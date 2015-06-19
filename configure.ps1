@@ -23,7 +23,7 @@ $miniupnpc = "$packagesDir\miniupnpc.pyd"
 
 $pythonUrl = "https://www.python.org/ftp/python/2.7.9/python-2.7.9.msi"
 $gpgUrl = "http://files.gpg4win.org/gpg4win-light-2.2.4.exe"
-$opensslUrl = "https://slproweb.com/download/Win32OpenSSL-1_0_2a.exe" #yes this is the official openssl for windows
+$opensslUrl = "https://slproweb.com/download/Win32OpenSSL-1_0_2c.exe" #yes this is the official openssl for windows
 $getpipUrl = "https://bootstrap.pypa.io/get-pip.py"
 $setupsDir =  "$bin\setups"
 $pythonSetup = "$setupsDir\python-2.7.9.msi"
