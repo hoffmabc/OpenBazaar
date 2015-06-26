@@ -1412,25 +1412,35 @@ class ProtocolHandler(object):
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
     # Set of WebsocketHandler
     listeners = set()
+
     # Protects listeners
     listen_lock = threading.Lock()
 
-    def initialize(self, transport, market_application, db_connection):
+    loop = None
+    log = None
+    market_application = None
+    market = None
+    transport = None
+    app_handler = None
+
+    def initialize(self):
         # pylint: disable=arguments-differ
         # FIXME: Arguments shouldn't differ.
         self.loop = tornado.ioloop.IOLoop.instance()
         self.log = logging.getLogger(self.__class__.__name__)
-        self.log.info("Initialize websockethandler")
-        self.market_application = market_application
+        self.log.info("Initialize WebsocketHandler")
+        self.market_application = self.application.market_application
         self.market = self.market_application.market
+        self.transport = self.application.transport
+
         self.app_handler = ProtocolHandler(
-            transport,
-            self.market_application,
+            self.application.transport,
+            self.application.market_application,
             self,
-            db_connection,
+            self.application.db,
             self.loop
         )
-        self.transport = transport
+
 
     def open(self):
         self.log.info('Websocket open')
