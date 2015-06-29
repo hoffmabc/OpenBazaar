@@ -18,10 +18,20 @@ from node.market import Market
 from node.transport import CryptoTransportLayer
 from node.util import open_default_webbrowser, is_mac
 from node.ws import WebSocketHandler
+from node.rest import \
+    RESTUsers, RESTCases, RESTSettings, RESTUsersListings, \
+    RESTSalesProtest, RESTSalesRefund, RESTCasesPayMerchant, \
+    RESTCasesRefundBuyer, RESTSettingsBlocked, RESTSettingsCommunication, \
+    RESTSettingsKeys, RESTSales, RESTCasesSplitPayment, RESTPurchases, \
+    RESTPurchasesCancel, RESTPurchasesProtest, RESTMessages, \
+    RESTSearchListings, RESTSearchModerators, RESTSearchUsers, \
+    RESTSearchVendors, RESTListings, RESTListingsImport
 from node import constants
+
 
 if is_mac():
     from node.util import osx_check_dyld_library_path
+
     osx_check_dyld_library_path()
 
 
@@ -143,7 +153,7 @@ class OpenBazaarContext(object):
                 'seeds': [
                     ('205.186.154.163', 12345),
                     ('205.186.156.31', 12345)
-                    #('seed.openlabs.co', 12345),
+                    # ('seed.openlabs.co', 12345),
                     #('us.seed.bizarre.company', 12345),
                     #('eu.seed.bizarre.company', 12345)
                 ],
@@ -199,6 +209,7 @@ class MarketApplication(tornado.web.Application):
         self.ob_ctx = ob_ctx
         self.loop = tornado.ioloop.IOLoop.instance()
         db_connection = Obdb(ob_ctx.db_path, ob_ctx.disable_sqlite_crypt)
+        self.db = db_connection
         self.transport = CryptoTransportLayer(ob_ctx, db_connection)
         self.market = Market(self.transport, db_connection)
         self.upnp_mapper = None
@@ -206,7 +217,7 @@ class MarketApplication(tornado.web.Application):
         Thread(target=reactor.run, args=(False,)).start()
 
         # Mediator is used to route messages between NAT'd peers
-        #self.mediator = Mediator(self.ob_ctx.http_ip, self.ob_ctx.mediator_port)
+        # self.mediator = Mediator(self.ob_ctx.http_ip, self.ob_ctx.mediator_port)
 
         peers = ob_ctx.seeds if not ob_ctx.seed_mode else []
         self.transport.join_network(peers)
@@ -215,12 +226,34 @@ class MarketApplication(tornado.web.Application):
             (r"/", MainHandler),
             (r"/main", MainHandler),
             (r"/html/(.*)", OpenBazaarStaticHandler, {'path': './html'}),
-            (r"/ws", WebSocketHandler,
-             {
-                 'transport': self.transport,
-                 'market_application': self,
-                 'db_connection': db_connection
-             })
+            (r"/ws", WebSocketHandler),
+            (r"/api/users/?(.*)", RESTUsers),
+            (r"/api/users/(.*)/listings", RESTUsersListings),
+            (r"/api/users/(.*)/listings/?(.*)", RESTUsersListings),
+            (r"/api/users/(.*)/follow", RESTUsersListings),
+            (r"/api/users/(.*)/unfollow", RESTUsersListings),
+            (r"/api/users/(.*)/reputation", RESTUsersListings),
+            (r"/api/cases/?(.*)", RESTCases),
+            (r"/api/cases/(.*)/refund_buyer", RESTCasesRefundBuyer),
+            (r"/api/cases/(.*)/pay_merchant", RESTCasesPayMerchant),
+            (r"/api/cases/(.*)/split_payment", RESTCasesSplitPayment),
+            (r"/api/sales/?(.*)", RESTSales),
+            (r"/api/sales/(.*)/refund", RESTSalesRefund),
+            (r"/api/sales/(.*)/protest", RESTSalesProtest),
+            (r"/api/purchases/?(.*)", RESTPurchases),
+            (r"/api/purchases/(.*)/cancel", RESTPurchasesCancel),
+            (r"/api/purchases/(.*)/protest", RESTPurchasesProtest),
+            (r"/api/settings/?(.*)", RESTSettings),
+            (r"/api/settings/keys", RESTSettingsKeys),
+            (r"/api/settings/communication", RESTSettingsCommunication),
+            (r"/api/settings/blocked", RESTSettingsBlocked),
+            (r"/api/messages/?(.*)", RESTMessages),
+            (r"/api/search/vendors/(.*)", RESTSearchVendors),
+            (r"/api/search/moderators/(.*)", RESTSearchModerators),
+            (r"/api/search/listings/(.*)", RESTSearchListings),
+            (r"/api/search/users/(.*)", RESTSearchUsers),
+            (r"/api/listings/?(.*)", RESTListings),
+            (r"/api/listings/import", RESTListingsImport)
         ]
 
         # TODO: Move debug settings to configuration location
