@@ -1415,14 +1415,15 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     loop = None
     log = None
     transport = None
+    market = None
     app_handler = None
 
     def initialize(self):
-        # pylint: disable=arguments-differ
-        # FIXME: Arguments shouldn't differ.
-        self.loop = tornado.ioloop.IOLoop.instance()
+
         self.log = logging.getLogger(self.__class__.__name__)
         self.log.info("Initialize WebsocketHandler")
+
+        self.loop = self.application.loop
         self.market = self.application.market
         self.transport = self.application.transport
 
@@ -1433,8 +1434,6 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         self.app_handler.send_opening()
         with WebSocketHandler.listen_lock:
             self.listeners.add(self)
-        self.connected = True
-        # self.connected not used for any logic, might remove if unnecessary
 
     def on_close(self):
         self.log.info("Websocket closed")
