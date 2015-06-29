@@ -24,13 +24,12 @@ import bitcoin
 
 
 class ProtocolHandler(object):
-    def __init__(self, transport, market_application, handler, db_connection,
-                 loop_instance):
-        self.market_application = market_application
-        self.market = self.market_application.market
-        self.transport = transport
-        self.handler = handler
-        self.db_connection = db_connection
+    def __init__(self, websocket_handler):
+
+        self.market = websocket_handler.application.market
+        self.transport = websocket_handler.application.transport
+        self.handler = websocket_handler
+        self.db_connection = websocket_handler.application.db
 
         self.transport.set_websocket_handler(self)
 
@@ -108,9 +107,6 @@ class ProtocolHandler(object):
         }
 
         self.timeouts = []
-
-        # unused for now, wipe it if you want later.
-        self.loop = loop_instance
 
         self.log = logging.getLogger(
             '[%s] %s' % (self.transport.market_id, self.__class__.__name__)
@@ -1418,8 +1414,6 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
     loop = None
     log = None
-    market_application = None
-    market = None
     transport = None
     app_handler = None
 
@@ -1429,18 +1423,10 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         self.loop = tornado.ioloop.IOLoop.instance()
         self.log = logging.getLogger(self.__class__.__name__)
         self.log.info("Initialize WebsocketHandler")
-        self.market_application = self.application.market_application
-        self.market = self.market_application.market
+        self.market = self.application.market
         self.transport = self.application.transport
 
-        self.app_handler = ProtocolHandler(
-            self.application.transport,
-            self.application.market_application,
-            self,
-            self.application.db,
-            self.loop
-        )
-
+        self.app_handler = ProtocolHandler(self)
 
     def open(self):
         self.log.info('Websocket open')
