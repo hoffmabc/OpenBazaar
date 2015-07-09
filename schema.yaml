@@ -1,0 +1,863 @@
+swagger: '2.0'
+info:
+  title: OpenBazaar API
+  description: Let's make trade free
+  version: "1.0.0"
+# the domain of the service
+host: localhost
+# array of all schemes that your API supports
+schemes:
+  - http
+# will be prefixed to all paths
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /users:
+    get:
+      summary: Interacting with users (vendors, buyers, moderators)
+      description: |
+        The *users* endpoint enables interaction with user objects
+      parameters:
+        - name: guid
+          in: query
+          description: GUID for the user on the network.
+          required: true
+          type: string
+      tags:
+        - Users
+      responses:
+        200:
+          description: A user object in JSON
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /users/follow:
+    post:
+      summary: Follow a user
+      description: |
+        The *users/follow* endpoint adds the specified user at the GUID specified
+        to their follow list. 
+      parameters:
+        - name: guid
+          in: query
+          description: GUID string
+          required: true
+          type: string
+          format: string
+      tags:
+        - Users
+      responses:
+        200:
+          description: No value returned
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /users/unfollow:
+    post:
+      summary: Unfollow a user
+      description: |
+        The *users/unfollow* endpoint removes the specified user at the GUID specified
+        from their follow list. 
+      parameters:
+        - name: guid
+          in: query
+          description: GUID string
+          required: true
+          type: string
+          format: string
+      tags:
+        - Users
+      responses:
+        200:
+          description: No value returned
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /users/reputation:
+    get:
+      summary: Retrieving reputation for a specific user on the network
+      description: |
+        The *users/reputation* endpoint allows retrieval of reputation info from the network
+      parameters:
+        - name: guid
+          in: query
+          description: GUID for the user on the network.
+          required: true
+          type: string
+      tags:
+        - Users
+      responses:
+        200:
+          description: A user object in JSON
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/UserReputation'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /users/listings:
+    get:
+      summary: Retrieving contract listings for a specific user on the network
+      description: |
+        The *users/listings* endpoint allows retrieval of listings info from the network
+      parameters:
+        - name: guid
+          in: query
+          description: GUID for the user on the network.
+          required: true
+          type: string
+        - name: count
+          in: query
+          description: Number of listings to limit request to before stopping
+          required: false
+          type: number
+        - name: offset
+          in: query
+          description: Offset number to start at
+          required: false
+          type: number
+      tags:
+        - Users
+        - Listings
+      responses:
+        200:
+          description: An array of listings
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/UserListings'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /cases:
+    get:
+      summary: Retrieving moderator cases the current user is participating in.
+      description: |
+        The *cases* endpoint allows retrieval of current moderator cases.
+      parameters:
+        - name: count
+          in: query
+          description: Number of cases to limit request to before stopping
+          required: false
+          type: number
+        - name: offset
+          in: query
+          description: Offset number to start at
+          required: false
+          type: number
+      tags:
+        - Cases
+      responses:
+        200:
+          description: An array of Cases
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Case'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /cases/refund_buyer:
+    post:
+      summary: Refund payment to a buyer for a specific case.
+      description: |
+        The *cases/refund_buyer* endpoint allows a moderator to refund a buyer for a
+        specified case.
+      parameters:
+        - name: case_id
+          in: query
+          description: id for the Case to be refunded
+          required: true
+          type: number
+      tags:
+        - Cases
+      responses:
+        200:
+          description: No response expected
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'        
+  /cases/pay_vendor:
+    post:
+      summary: Release payment to vendor for a specific case.
+      description: |
+        The *cases/pay_vendor* endpoint allows a moderator to release payment to a vendor
+        for a specified case.
+      parameters:
+        - name: case_id
+          in: query
+          description: id for the Case to be paid out
+          required: true
+          type: number
+      tags:
+        - Cases
+      responses:
+        200:
+          description: No response expected
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error' 
+  /cases/split_payment:
+    post:
+      summary: Allows moderator to split escrow across both parties for a specific case.
+      description: |
+        The *cases/split_payment* endpoint allows a moderator to split the escrow amount
+        across multiple parties for a specified case (e.g. 50/50 split).
+      parameters:
+        - name: case_id
+          in: query
+          description: id for the Case to be refunded
+          required: true
+          type: number
+        - name: amount_to_buyer
+          in: query
+          description: Percentage amount to refund to buyer (0 to 100)
+          required: true
+          type: number
+      tags:
+        - Cases
+      responses:
+        200:
+          description: No response expected
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'         
+  /sales:
+    get:
+      summary: Retrieving orders that the current user is the vendor for.
+      description: |
+        The *sales* endpoint allows retrieval of current sales orders.
+      parameters:
+        - name: count
+          in: query
+          description: Number of orders to limit request to before stopping
+          required: false
+          type: number
+        - name: offset
+          in: query
+          description: Offset number to start at
+          required: false
+          type: number
+        - name: filter
+          in: query
+          description: Filter for narrowing down list of orders to return.
+          required: false
+          type: string
+      tags:
+        - Orders
+      responses:
+        200:
+          description: An array of Orders
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Order'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'  
+  /sales/refund:
+    post:
+      summary: Allows vendor to refund the buyer and cancel the order
+      description: |
+        The *sales/refund* endpoint allows the vendor to refund the buyer and cancel
+        their order.
+      parameters:
+        - name: order_id
+          in: query
+          description: id for the Order to be refunded and cancelled
+          required: true
+          type: number
+      tags:
+        - Orders
+      responses:
+        200:
+          description: No response expected
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'  
+  /sales/protest:
+    post:
+      summary: Allows vendor to protest the order to a moderator in event of a problem.
+      description: |
+        The *sales/protest* endpoint allows a vendor to notify the moderator of a problem
+        and send a short message describing the issue.
+      parameters:
+        - name: order_id
+          in: query
+          description: id for the Order to be disputed
+          required: true
+          type: number
+        - name: message_to_mod
+          in: query
+          description: Message to the moderator describing the reason for protest.
+          required: true
+          type: string
+      tags:
+        - Orders
+      responses:
+        200:
+          description: No response expected
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error' 
+  /purchases:
+    get:
+      summary: Retrieving orders that the current user is the buyer in.
+      description: |
+        The *purchases* endpoint allows retrieval of current purchases.
+      parameters:
+        - name: count
+          in: query
+          description: Number of orders to limit request to before stopping
+          required: false
+          type: number
+        - name: offset
+          in: query
+          description: Offset number to start at
+          required: false
+          type: number
+        - name: filter
+          in: query
+          description: Filter for narrowing down list of orders to return.
+          required: false
+          type: string
+      tags:
+        - Orders
+      responses:
+        200:
+          description: An array of Orders
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Order'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'  
+  /purchases/cancel:
+    post:
+      summary: Allows buyer to cancel in order and request a refund.
+      description: |
+        The *purchases/cancel* endpoint allows the buyer to cancel their order and request
+        a refund.
+      parameters:
+        - name: order_id
+          in: query
+          description: id for the Order to be refunded and cancelled
+          required: true
+          type: number
+      tags:
+        - Orders
+      responses:
+        200:
+          description: No response expected
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'  
+  /purchases/protest:
+    post:
+      summary: Allows buyer to protest the order to a moderator in event of a problem.
+      description: |
+        The *purchases/protest* endpoint allows a buyer to notify the moderator of a problem
+        and send a short message describing the issue.
+      parameters:
+        - name: order_id
+          in: query
+          description: id for the Order to be disputed
+          required: true
+          type: number
+        - name: message_to_mod
+          in: query
+          description: Message to the moderator describing the reason for protest.
+          required: true
+          type: string
+      tags:
+        - Orders
+      responses:
+        200:
+          description: No response expected
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'     
+  /settings:
+    get:
+      summary: Retrieve an object containing all the settings for the current user.
+      description: |
+        The *settings* endpoint allows a user to retrieve all current settings and 
+        configuration and information.
+      parameters:
+        - name: include_sensitive
+          in: query
+          description: flag for disclosing sensitive data (i.e. keys) in response
+          required: false
+          type: number
+      tags:
+        - Settings
+      responses:
+        200:
+          description: Object containing all User data
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /messages:
+    get:
+      summary: Retrieve messages from private inbox
+      description: |
+        The *messages* endpoint allows a user to retrieve all messages in their private
+        inbox for OpenBazaar.
+      parameters:
+        - name: from_user
+          in: query
+          description: Filters out messages from everyone but this GUID
+          required: false
+          type: string
+        - name: to_user
+          in: query
+          description: Filters out messages not to this GUID
+          required: false
+          type: string
+        - name: count
+          in: query
+          description: Limits messages returned to this amount
+          required: false
+          type: number
+        - name: offset
+          in: query
+          description: Offset number to start from
+          required: false
+          type: number
+        - name: show_cleared
+          in: query
+          description: Include messages that were previously cleared
+          required: false
+          type: boolean
+      tags:
+        - Messages
+      responses:
+        200:
+          description: Array containing Message objects
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/Message'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /messages/send:
+    post:
+      summary: Send a new private message to another user
+      description: |
+        The *messages/send* endpoint allows a user to send a private message to 
+        another online OpenBazaar user.
+      parameters:
+        - name: body
+          in: query
+          description: Body of the message.
+          required: true
+          type: string
+        - name: recipient_id
+          in: query
+          description: GUID for user to send message to.
+          required: true
+          type: string
+      tags:
+        - Messages
+      responses:
+        200:
+          description: No response
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /messages/clear_conversation:
+    post:
+      summary: Mark all current visible messages with a user as hidden.
+      description: |
+        The *messages/clear_conversation* endpoint marks all visible messages
+        with a specific user as hidden or cleared.
+      parameters:
+        - name: user_id
+          in: query
+          description: GUID of user to clear conversation for.
+          required: true
+          type: string
+      tags:
+        - Messages
+      responses:
+        200: 
+          description: No responses
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /messages/clear_conversation:
+    post:
+      summary: Mark all current visible messages with a user as hidden.
+      description: |
+        The *messages/clear_conversation* endpoint marks all visible messages
+        with a specific user as hidden or cleared.
+      parameters:
+        - name: user_id
+          in: query
+          description: GUID of user to clear conversation for.
+          required: true
+          type: string
+      tags:
+        - Messages
+      responses:
+        200:
+          description: No responses
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /search:
+    get:
+      summary: Search for anything on the network
+      description: |
+        The */search* endpoint returns information about anything matching the query on the network. This
+        currently includes users, moderators, vendors and listings
+      parameters:
+        - name: query
+          in: query
+          description: Search term to look for on the network
+          required: true
+          type: string
+        - name: count
+          in: query
+          description: Number of items to return
+          required: false
+          type: number
+      tags:
+        - Search
+      responses:
+        200:
+          description: Array containing SearchResult objects
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/SearchResult'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /search/vendors:
+    get:
+      summary: Search for vendor users
+      description: |
+        The */search/vendors* endpoint returns information about matching vendors on the network
+      parameters:
+        - name: query
+          in: query
+          description: Search term to look for on the network
+          required: true
+          type: string
+        - name: count
+          in: query
+          description: Number of items to return
+          required: false
+          type: number
+      tags:
+        - Search
+      responses:
+        200:
+          description: Array containing SearchResult objects
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/SearchResult'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /search/moderators:
+    get:
+      summary: Search for moderator users
+      description: |
+        The */search/moderators* endpoint returns information about matching moderators on the network
+      parameters:
+        - name: query
+          in: query
+          description: Search term to look for on the network
+          required: true
+          type: string
+        - name: count
+          in: query
+          description: Number of items to return
+          required: false
+          type: number
+      tags:
+        - Search
+      responses:
+        200:
+          description: Array containing SearchResult objects
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/SearchResult'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /search/listings:
+    get:
+      summary: Search for listings on the network
+      description: |
+        The */search/listings* endpoint returns information about matching listings on the network
+      parameters:
+        - name: query
+          in: query
+          description: Search term to look for on the network
+          required: true
+          type: string
+        - name: count
+          in: query
+          description: Number of items to return
+          required: false
+          type: number
+      tags:
+        - Search
+      responses:
+        200:
+          description: Array containing SearchResult objects
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/SearchResult'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /search/listings:
+    get:
+      summary: Search for listings on the network
+      description: |
+        The */search/listings* endpoint returns information about matching listings on the network
+      parameters:
+        - name: query
+          in: query
+          description: Search term to look for on the network
+          required: true
+          type: string
+        - name: count
+          in: query
+          description: Number of items to return
+          required: false
+          type: number
+      tags:
+        - Search
+      responses:
+        200:
+          description: Array containing SearchResult objects
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/SearchResult'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /listings:
+    get:
+      summary: Retrieve current user's listings
+      description: |
+        The */listings* endpoint returns information about current user's listings on the network
+      parameters:
+        - name: query
+          in: query
+          description: Search term to filter the results
+          required: false
+          type: string
+        - name: count
+          in: query
+          description: Number of items to return
+          required: false
+          type: number
+        - name: offset
+          in: query
+          description: Offset number where to start querying from
+          required: false
+          type: number
+      tags:
+        - Listings
+        - Users
+      responses:
+        200:
+          description: Array containing Listing objects
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/Listing'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  User:
+    properties:
+      guid:
+        type: string
+        description: Unique identifier representing a node on the network.
+      nickname:
+        type: string
+        description: Nickname on the network.
+      firstname:
+        type: string
+        description: First name on the network.
+      surname:
+        type: string
+        description: Surname on the network.
+      email:
+        type: string
+        description: Email address
+      nickname:
+        type: string
+        description: Nickname on the network.
+      description:
+        type: string
+        description: Description of your store 
+      street1:
+        type: string
+        description: Street address line 1
+      street2:
+        type: string
+        description: Street address line 2
+      city:
+        type: string
+        description: City
+      state_region:
+        type: string
+        description: State or region
+      state_province_region:
+        type: string
+        description: State province or region
+      zip:
+        type: string
+        description: Zip code
+      telephone:
+        type: string
+        description: Telephone 
+      fax:
+        type: string
+        description: Fax number
+      country:
+        type: string
+        description: Country
+      countryCode:
+        type: string
+        description: Country code
+      is_moderator:
+        type: boolean
+        description: Flag for if user is a moderator
+      is_merchant:
+        type: boolean
+        description: Flag for if user is a merchant
+      website:
+        type: string
+        description: Web site URL for business
+      moderator_fee:
+        type: number
+        description: Percentage of fee for moderation
+      moderator_services:
+        type: string
+        description: Description of services rendered as moderator
+      refund_address:
+        type: string
+        description: Bitcoin address to use for refunds
+  UserReputation:
+    properties:
+      guid:
+        type: string
+        description: Unique identifier representing a node on the network.
+  UserListings:
+    properties:
+      guid:
+        type: string
+        description: Unique identifier representing a node on the network.
+      listings:
+        type: object
+        description: Array of raw Listing objects
+      count:
+        type: number
+        description: Number of Listings returned
+  Listing:
+    properties:
+      listing_id:
+        type: string
+        description: Unique identifier finding the listing
+      ricardian_contract:
+        type: string
+        description: JSON Ricardian contract for the listing
+  Case:
+    properties:
+      case_id:
+        type: string
+        description: Unique id for the moderator Case
+  Order:
+    properties:
+      order_id:
+        type: string
+        description: Unique id for the Order
+      state:
+        type: string
+        description: Current state of the Order
+      ricardian_contract:
+        type: string
+        description: JSON Ricardian contract in current state
+  SearchResult:
+    properties:
+      result:
+        type: object
+        description: Any of the valid result types (i.e. User, Listing)
+  Message:
+    properties:
+      message_id:
+        type: string
+        description: Unique id for the Message
+      message_body:
+        type: string
+        description: Body of the message
+      sender_id:
+        type: string
+        description: GUID of the sender
+      recipient_id:
+        type: string
+        description: GUID of the recipient
+      timestamp:
+        type: string
+        description: Date Timestamp when message was sent
+  Error:
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
