@@ -42,20 +42,90 @@ class RESTHandler(tornado.web.RequestHandler):
 
 
 class RESTUsers(RESTHandler):
-    def get(self, GUID):
-        assert (GUID, 'You must send a GUID')
+    def get(self):
+        """Return User object with the specified GUID
+        """
+        self.log.info('[REST/GET] /users')
 
-        self.write('GUID: %s' % GUID)
+        # Get URL Params
+        guid = self.get_argument('user_id')
+
+        # Validate
+        assert(len(guid) > 0, 'There is no GUID specified.')
+
+        # Pass off to the underlying module
+        self.write('GUID: %s' % guid)
+
+
+class RESTUsersFollow(RESTHandler):
+    def post(self):
+        """Add User designated by specified GUID as someone
+        to follow
+        """
+        self.log.info('[REST/POST] /users/follow')
+
+        guid = self.get_argument('user_id')
+
+        assert(len(guid) > 0, 'No GUID is specified')
+
+        # users.follow_user(guid)
+
+
+class RESTUsersUnfollow(RESTHandler):
+    def post(self):
+        """Remove User designated by specified GUID from a
+        follow list
+        """
+        self.log.info('[REST/POST] /users/unfollow')
+
+        guid = self.get_argument('user_id')
+
+        assert(len(guid) > 0, 'No GUID is specified')
+
+        # users.unfollow_user(guid)
+
+
+class RESTUsersReputation(RESTHandler):
+    def post(self):
+        """Retrieve a reputation score for a user from
+        the network.
+        """
+        self.log.info('[REST/GET] /users/reputation')
+
+        guid = self.get_argument('user_id')
+
+        assert(len(guid) > 0, 'No GUID is specified')
+
+        # users.reputation(guid)
 
 
 class RESTUsersListings(RESTHandler):
-    def get(self, guid):
-        self.write({'listings': ''})
+    def get(self):
+        """Get Listings from a user specified by the GUID
+        """
+        self.log.info('[REST/GET] /users/listings')
+
+        guid = self.get_argument('user_id')
+        count = self.get_argument('count')
+        offset = self.get_argument('offset')
+
+        assert(len(guid) > 0, 'No GUID is specified')
+
+        # users.listings(guid, count, offset)
 
 
 class RESTMessages(RESTHandler):
     def get(self):
-        self.write({})
+        """Retrieve messages from private inbox.
+        """
+        self.log.info('[REST/GET] /messages')
+
+        count = self.get_argument('count')
+        offset = self.get_argument('offset')
+        from_user = self.get_argument('from_user')
+        to_user = self.get_argument('offset')
+
+        # inbox.messages(count, offset, from_user, to_user)
 
 
 class RESTSearchVendors(RESTHandler):
@@ -80,22 +150,57 @@ class RESTSearchModerators(RESTHandler):
 
 class RESTCases(RESTHandler):
     def get(self):
-        self.write({})
+        """Retrieving moderator cases the current user is
+        participating in.
+        """
+        self.log.info('[REST/GET] /cases')
+
+        count = self.get_argument('count')
+        offset = self.get_argument('offset')
+
+        # market.get_cases(count, offset)
 
 
 class RESTCasesRefundBuyer(RESTHandler):
-    def get(self):
-        self.write({})
+    def post(self):
+        """Refund payment to a buyer for a specific case.
+        """
+        self.log.info('[REST/POST] /cases/refund_buyer')
+
+        case_id = self.get_argument('case_id')
+
+        assert(len(case_id) > 0, 'No Case ID is specified')
+
+        # cases.refund_buyer(case_id)
 
 
-class RESTCasesPayMerchant(RESTHandler):
-    def get(self):
-        self.write({})
+class RESTCasesPayVendor(RESTHandler):
+    def post(self):
+        """Release payment to vendor for a specific case.
+        """
+        self.log.info('[REST/POST] /cases/pay_vendor')
+
+        case_id = self.get_argument('case_id')
+
+        assert(len(case_id) > 0, 'No Case ID is specified')
+
+        # cases.pay_vendor(case_id)
 
 
 class RESTCasesSplitPayment(RESTHandler):
-    def get(self):
-        self.write({})
+    def post(self):
+        """Allows moderator to split escrow across both parties
+        for a specific case.
+        """
+        self.log.info('[REST/POST] /cases/split_payment')
+
+        case_id = self.get_argument('case_id')
+        amount_to_buyer = self.get_argument('amount_to_buyer')
+
+        assert(len(case_id) > 0, 'No Case ID is specified')
+        assert(0 >= amount_to_buyer > 100, 'Invalid %')
+
+        # cases.split_payment(case_id, amount_to_buyer)
 
 
 class RESTPurchases(RESTHandler):
