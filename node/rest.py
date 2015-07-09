@@ -57,6 +57,23 @@ class RESTUsers(RESTHandler):
         self.write('GUID: %s' % guid)
 
 
+class RESTUsersListings(RESTHandler):
+    def get(self):
+        """Retrieving contract listings for a specific user
+        on the network.
+        """
+        self.log.info('[REST/GET] /users/listings')
+
+        guid = self.get_argument('user_id')
+        count = self.get_argument('count')
+        offset = self.get_argument('offset')
+
+        # Validate
+        assert(len(guid) > 0, 'There is no GUID specified.')
+
+        # market.listings_by_user_id(guid, count, offset)
+
+
 class RESTUsersFollow(RESTHandler):
     def post(self):
         """Add User designated by specified GUID as someone
@@ -126,6 +143,34 @@ class RESTMessages(RESTHandler):
         to_user = self.get_argument('offset')
 
         # inbox.messages(count, offset, from_user, to_user)
+
+
+class RESTMessagesSend(RESTHandler):
+    def post(self):
+        """Send a new private message to another user.
+        """
+        self.log.info('[REST/POST] /messages/send')
+
+        recipient_id = self.get_argument('recipient_id')
+        body = self.get_argument('body')
+
+        assert(len(recipient_id) > 0, 'No GUID is specified')
+        assert(len(body) > 0, 'Empty message')
+
+        # inbox.send_message(recipient_id, body)
+
+
+class RESTMessagesClearConversation(RESTHandler):
+    def post(self):
+        """Mark all current messages with a user as hidden.
+        """
+        self.log.info('[REST/POST] /messages/clear_conversation')
+
+        user_id = self.get_argument('user_id')
+
+        assert(len(user_id) > 0, 'No GUID is specified')
+
+        # inbox.clear_conversation(user_id)
 
 
 class RESTSearchVendors(RESTHandler):
@@ -260,9 +305,17 @@ class RESTSalesRefund(RESTHandler):
 
 class RESTListings(RESTHandler):
     def get(self):
-        self.write({})
+        """Retrieve current user's listings.
+        """
+        self.log.info('[REST/GET] /listings')
+
+        query = self.get_argument('query')
+        count = self.get_argument('count')
+        offset = self.get_argument('offset')
+
+        # market.my_listings(count, offset, query)
 
 
-class RESTListingsImport(RESTHandler):
-    def get(self):
-        self.write({})
+# class RESTListingsImport(RESTHandler):
+#     def get(self):
+#         self.write({})
