@@ -30,7 +30,7 @@ class RESTUsers(RESTHandler):
         guid = self.get_argument('user_id')
 
         # Validate
-        assert(len(guid) > 0, 'There is no GUID specified.')
+        assert len(guid) > 0, 'There is no GUID specified.'
 
         # Pass off to the underlying module
         self.write('GUID: %s' % guid)
@@ -48,7 +48,7 @@ class RESTUsersListings(RESTHandler):
         offset = self.get_argument('offset')
 
         # Validate
-        assert(len(guid) > 0, 'There is no GUID specified.')
+        assert len(guid) > 0, 'There is no GUID specified.'
 
         # market.listings_by_user_id(guid, count, offset)
 
@@ -62,7 +62,7 @@ class RESTUsersFollow(RESTHandler):
 
         guid = self.get_argument('user_id')
 
-        assert(len(guid) > 0, 'No GUID is specified')
+        assert len(guid) > 0, 'No GUID is specified'
 
         # users.follow_user(guid)
 
@@ -76,7 +76,7 @@ class RESTUsersUnfollow(RESTHandler):
 
         guid = self.get_argument('user_id')
 
-        assert(len(guid) > 0, 'No GUID is specified')
+        assert len(guid) > 0, 'No GUID is specified'
 
         # users.unfollow_user(guid)
 
@@ -90,7 +90,7 @@ class RESTUsersReputation(RESTHandler):
 
         guid = self.get_argument('user_id')
 
-        assert(len(guid) > 0, 'No GUID is specified')
+        assert len(guid) > 0, 'No GUID is specified'
 
         # users.reputation(guid)
 
@@ -118,8 +118,8 @@ class RESTMessagesSend(RESTHandler):
         recipient_id = self.get_argument('recipient_id')
         body = self.get_argument('body')
 
-        assert(len(recipient_id) > 0, 'No GUID is specified')
-        assert(len(body) > 0, 'Empty message')
+        assert len(recipient_id) > 0, 'No GUID is specified'
+        assert len(body) > 0, 'Empty message'
 
         # inbox.send_message(recipient_id, body)
 
@@ -132,7 +132,7 @@ class RESTMessagesClearConversation(RESTHandler):
 
         user_id = self.get_argument('user_id')
 
-        assert(len(user_id) > 0, 'No GUID is specified')
+        assert len(user_id) > 0, 'No GUID is specified'
 
         # inbox.clear_conversation(user_id)
 
@@ -146,7 +146,7 @@ class RESTSearch(RESTHandler):
         count = self.get_argument('count')
         query = self.get_argument('query')
 
-        assert(len(query) > 0, 'No search query provided')
+        assert len(query) > 0, 'No search query provided'
 
         # search.find(query, count)
 
@@ -160,7 +160,7 @@ class RESTSearchVendors(RESTHandler):
         count = self.get_argument('count')
         query = self.get_argument('query')
 
-        assert(len(query) > 0, 'No search query provided')
+        assert len(query) > 0, 'No search query provided'
 
         # search.find_vendors(query, count)
 
@@ -174,7 +174,7 @@ class RESTSearchModerators(RESTHandler):
         count = self.get_argument('count')
         query = self.get_argument('query')
 
-        assert(len(query) > 0, 'No search query provided')
+        assert len(query) > 0, 'No search query provided'
 
         # search.find_moderators(query, count)
 
@@ -188,9 +188,23 @@ class RESTSearchListings(RESTHandler):
         count = self.get_argument('count')
         query = self.get_argument('query')
 
-        assert(len(query) > 0, 'No search query provided')
+        assert len(query) > 0, 'No search query provided'
 
         # search.find_listings(query, count)
+
+
+class RESTSearchUsers(RESTHandler):
+    def get(self):
+        """Search for users.
+        """
+        self.log.info('[REST/GET] /search/users')
+
+        count = self.get_argument('count')
+        query = self.get_argument('query')
+
+        assert len(query) > 0, 'No search query provided'
+
+        # search.find_users(query, count)
 
 
 class RESTCases(RESTHandler):
@@ -214,7 +228,7 @@ class RESTCasesRefundBuyer(RESTHandler):
 
         case_id = self.get_argument('case_id')
 
-        assert(len(case_id) > 0, 'No Case ID is specified')
+        assert len(case_id) > 0, 'No Case ID is specified'
 
         # cases.refund_buyer(case_id)
 
@@ -227,7 +241,7 @@ class RESTCasesPayVendor(RESTHandler):
 
         case_id = self.get_argument('case_id')
 
-        assert(len(case_id) > 0, 'No Case ID is specified')
+        assert len(case_id) > 0, 'No Case ID is specified'
 
         # cases.pay_vendor(case_id)
 
@@ -242,8 +256,8 @@ class RESTCasesSplitPayment(RESTHandler):
         case_id = self.get_argument('case_id')
         amount_to_buyer = self.get_argument('amount_to_buyer')
 
-        assert(len(case_id) > 0, 'No Case ID is specified')
-        assert(0 >= amount_to_buyer > 100, 'Invalid %')
+        assert len(case_id) > 0, 'No Case ID is specified'
+        assert 0 >= amount_to_buyer > 100, 'Invalid %'
 
         # cases.split_payment(case_id, amount_to_buyer)
 
@@ -271,8 +285,8 @@ class RESTPurchasesProtest(RESTHandler):
         order_id = self.get_argument('order_id')
         message_to_mod = self.get_argument('message_to_mod')
 
-        assert(len(order_id) > 0, 'No Order ID is specified')
-        assert(len(message_to_mod) > 0, 'No message content')
+        assert len(order_id) > 0, 'No Order ID is specified'
+        assert len(message_to_mod) > 0, 'No message content'
 
         # purchases.protest(order_id, message_to_mod)
 
@@ -286,7 +300,7 @@ class RESTPurchasesCancel(RESTHandler):
         order_id = self.get_argument('order_id')
         reason = self.get_argument('reason')
 
-        assert(len(order_id) > 0, 'No Order ID is specified')
+        assert len(order_id) > 0, 'No Order ID is specified'
 
         # purchases.cancel(order_id, reason)
 
@@ -334,8 +348,8 @@ class RESTSalesProtest(RESTHandler):
         order_id = self.get_argument('order_id')
         message_to_mod = self.get_argument('message_to_mod')
 
-        assert(len(order_id) > 0, 'No Order ID is specified')
-        assert(len(message_to_mod) > 0, 'No message content')
+        assert len(order_id) > 0, 'No Order ID is specified'
+        assert len(message_to_mod) > 0, 'No message content'
 
         # sales.protest(order_id, message_to_mod)
 
@@ -348,7 +362,7 @@ class RESTSalesRefund(RESTHandler):
 
         order_id = self.get_argument('order_id')
 
-        assert(len(order_id) > 0, 'No Order ID is specified')
+        assert len(order_id) > 0, 'No Order ID is specified'
 
         # sales.refund(order_id)
 
