@@ -364,6 +364,11 @@ paths:
           description: id for the Order to be refunded and cancelled
           required: true
           type: number
+        - name: reason
+          in: query
+          description: Test description of reason for cancellation
+          required: false
+          type: string
       tags:
         - Orders
       responses:
