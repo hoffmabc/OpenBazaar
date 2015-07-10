@@ -18,14 +18,7 @@ from node.market import Market
 from node.transport import CryptoTransportLayer
 from node.util import open_default_webbrowser, is_mac
 from node.ws import WebSocketHandler
-from node.rest import \
-    RESTUsers, RESTCases, RESTSettings, RESTUsersListings, \
-    RESTSalesProtest, RESTSalesRefund, RESTCasesPayMerchant, \
-    RESTCasesRefundBuyer, RESTSettingsBlocked, RESTSettingsCommunication, \
-    RESTSettingsKeys, RESTSales, RESTCasesSplitPayment, RESTPurchases, \
-    RESTPurchasesCancel, RESTPurchasesProtest, RESTMessages, \
-    RESTSearchListings, RESTSearchModerators, RESTSearchUsers, \
-    RESTSearchVendors, RESTListings, RESTListingsImport
+import node.rest
 from node import constants
 
 
@@ -227,33 +220,31 @@ class MarketApplication(tornado.web.Application):
             (r"/main", MainHandler),
             (r"/html/(.*)", OpenBazaarStaticHandler, {'path': './html'}),
             (r"/ws", WebSocketHandler),
-            (r"/api/users/?(.*)", RESTUsers),
-            (r"/api/users/(.*)/listings", RESTUsersListings),
-            (r"/api/users/(.*)/listings/?(.*)", RESTUsersListings),
-            (r"/api/users/(.*)/follow", RESTUsersListings),
-            (r"/api/users/(.*)/unfollow", RESTUsersListings),
-            (r"/api/users/(.*)/reputation", RESTUsersListings),
-            (r"/api/cases/?(.*)", RESTCases),
-            (r"/api/cases/(.*)/refund_buyer", RESTCasesRefundBuyer),
-            (r"/api/cases/(.*)/pay_merchant", RESTCasesPayMerchant),
-            (r"/api/cases/(.*)/split_payment", RESTCasesSplitPayment),
-            (r"/api/sales/?(.*)", RESTSales),
-            (r"/api/sales/(.*)/refund", RESTSalesRefund),
-            (r"/api/sales/(.*)/protest", RESTSalesProtest),
-            (r"/api/purchases/?(.*)", RESTPurchases),
-            (r"/api/purchases/(.*)/cancel", RESTPurchasesCancel),
-            (r"/api/purchases/(.*)/protest", RESTPurchasesProtest),
-            (r"/api/settings/?(.*)", RESTSettings),
-            (r"/api/settings/keys", RESTSettingsKeys),
-            (r"/api/settings/communication", RESTSettingsCommunication),
-            (r"/api/settings/blocked", RESTSettingsBlocked),
-            (r"/api/messages/?(.*)", RESTMessages),
-            (r"/api/search/vendors/(.*)", RESTSearchVendors),
-            (r"/api/search/moderators/(.*)", RESTSearchModerators),
-            (r"/api/search/listings/(.*)", RESTSearchListings),
-            (r"/api/search/users/(.*)", RESTSearchUsers),
-            (r"/api/listings/?(.*)", RESTListings),
-            (r"/api/listings/import", RESTListingsImport)
+            (r"/v1/users", node.rest.RESTUsers),
+            (r"/v1/users/follow", node.rest.RESTUsersFollow),
+            (r"/v1/users/unfollow", node.rest.RESTUsersUnfollow),
+            (r"/v1/users/reputation", node.rest.RESTUsersReputation),
+            (r"/v1/cases", node.rest.RESTCases),
+            (r"/v1/cases/refund_buyer", node.rest.RESTCasesRefundBuyer),
+            (r"/v1/cases/pay_merchant", node.rest.RESTCasesPayVendor),
+            (r"/v1/cases/split_payment", node.rest.RESTCasesSplitPayment),
+            (r"/v1/sales/", node.rest.RESTSales),
+            (r"/v1/sales/refund", node.rest.RESTSalesRefund),
+            (r"/v1/sales/protest", node.rest.RESTSalesProtest),
+            (r"/v1/purchases", node.rest.RESTPurchases),
+            (r"/v1/purchases/cancel", node.rest.RESTPurchasesCancel),
+            (r"/v1/purchases/protest", node.rest.RESTPurchasesProtest),
+            (r"/v1/settings", node.rest.RESTSettings),
+            (r"/v1/settings/keys", node.rest.RESTSettingsKeys),
+            (r"/v1/settings/communication", node.rest.RESTSettingsCommunication),
+            (r"/v1/settings/blocked", node.rest.RESTSettingsBlocked),
+            (r"/v1/messages", node.rest.RESTMessages),
+            (r"/v1/search/vendors", node.rest.RESTSearchVendors),
+            (r"/v1/search/moderators", node.rest.RESTSearchModerators),
+            (r"/v1/search/listings", node.rest.RESTSearchListings),
+            (r"/v1/search/users", node.rest.RESTSearchUsers),
+            (r"/v1/listings", node.rest.RESTListings),
+            # (r"/v1/listings/import", RESTListingsImport)
         ]
 
         # TODO: Move debug settings to configuration location
