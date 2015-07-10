@@ -1,26 +1,5 @@
-# import threading
 import logging
-# import subprocess
-# import pycountry
-# import gnupg
-# import obelisk
-# import json
-# import random
-# import time
-# import urllib2
-# from bitcoin import (
-#     apply_multisignatures,
-#     mk_multisig_script,
-#     mktx,
-#     multisign,
-#     scriptaddr
-# )
-# from tornado import iostream
 import tornado.web
-# from twisted.internet import reactor
-# from node import constants, protocol, trust
-# from node.backuptool import BackupTool, Backup, BackupJSONEncoder
-# import bitcoin
 
 
 class RESTHandler(tornado.web.RequestHandler):
@@ -33,7 +12,7 @@ class RESTHandler(tornado.web.RequestHandler):
 
     def initialize(self):
         self.log = logging.getLogger(self.__class__.__name__)
-        self.log.info("Initialize RESTHandler")
+        self.log.debug("Initialize RESTHandler")
 
         self.loop = self.application.loop
         self.market_application = self.application
@@ -116,21 +95,6 @@ class RESTUsersReputation(RESTHandler):
         # users.reputation(guid)
 
 
-class RESTUsersListings(RESTHandler):
-    def get(self):
-        """Get Listings from a user specified by the GUID
-        """
-        self.log.info('[REST/GET] /users/listings')
-
-        guid = self.get_argument('user_id')
-        count = self.get_argument('count')
-        offset = self.get_argument('offset')
-
-        assert(len(guid) > 0, 'No GUID is specified')
-
-        # users.listings(guid, count, offset)
-
-
 class RESTMessages(RESTHandler):
     def get(self):
         """Retrieve messages from private inbox.
@@ -173,24 +137,60 @@ class RESTMessagesClearConversation(RESTHandler):
         # inbox.clear_conversation(user_id)
 
 
+class RESTSearch(RESTHandler):
+    def get(self):
+        """Search for anything on the network.
+        """
+        self.log.info('[REST/GET] /search')
+
+        count = self.get_argument('count')
+        query = self.get_argument('query')
+
+        assert(len(query) > 0, 'No search query provided')
+
+        # search.find(query, count)
+
+
 class RESTSearchVendors(RESTHandler):
     def get(self):
-        self.write({})
+        """Search for vendor users.
+        """
+        self.log.info('[REST/GET] /search/vendors')
 
+        count = self.get_argument('count')
+        query = self.get_argument('query')
 
-class RESTSearchUsers(RESTHandler):
-    def get(self):
-        self.write({})
+        assert(len(query) > 0, 'No search query provided')
 
-
-class RESTSearchListings(RESTHandler):
-    def get(self):
-        self.write({})
+        # search.find_vendors(query, count)
 
 
 class RESTSearchModerators(RESTHandler):
     def get(self):
-        self.write({})
+        """Search for moderator users.
+        """
+        self.log.info('[REST/GET] /search/moderators')
+
+        count = self.get_argument('count')
+        query = self.get_argument('query')
+
+        assert(len(query) > 0, 'No search query provided')
+
+        # search.find_moderators(query, count)
+
+
+class RESTSearchListings(RESTHandler):
+    def get(self):
+        """Search for market listings.
+        """
+        self.log.info('[REST/GET] /search/listings')
+
+        count = self.get_argument('count')
+        query = self.get_argument('query')
+
+        assert(len(query) > 0, 'No search query provided')
+
+        # search.find_listings(query, count)
 
 
 class RESTCases(RESTHandler):
@@ -249,23 +249,46 @@ class RESTCasesSplitPayment(RESTHandler):
 
 
 class RESTPurchases(RESTHandler):
-    def get(self, purchase_id=None):
-        if purchase_id:
-            self.write({
-                'purchase_id': purchase_id
-            })
-        else:
-            self.write({})
+    def get(self):
+        """Retrieving orders that the current user is the buyer for.
+        """
+        self.log.info('[REST/GET] /purchases')
 
+        count = self.get_argument('count')
+        offset = self.get_argument('offset')
+        order_filter = self.get_argument('filter')
 
-class RESTPurchasesCancel(RESTHandler):
-    def get(self, purchase_id):
-        self.write({})
+        # market.purchases(count, offset, order_filter)
 
 
 class RESTPurchasesProtest(RESTHandler):
-    def get(self, purchase_id):
-        self.write({})
+    def post(self):
+        """Allows buyer to protest the order to a moderator in the
+        event of a problem.
+        """
+        self.log.info('[REST/POST] /purchases/protest')
+
+        order_id = self.get_argument('order_id')
+        message_to_mod = self.get_argument('message_to_mod')
+
+        assert(len(order_id) > 0, 'No Order ID is specified')
+        assert(len(message_to_mod) > 0, 'No message content')
+
+        # purchases.protest(order_id, message_to_mod)
+
+
+class RESTPurchasesCancel(RESTHandler):
+    def post(self):
+        """Allows buyer to cancel in order and request a refund.
+        """
+        self.log.info('[REST/POST] /purchases/cancel')
+
+        order_id = self.get_argument('order_id')
+        reason = self.get_argument('reason')
+
+        assert(len(order_id) > 0, 'No Order ID is specified')
+
+        # purchases.cancel(order_id, reason)
 
 
 class RESTSettings(RESTHandler):
@@ -290,17 +313,44 @@ class RESTSettingsBlocked(RESTHandler):
 
 class RESTSales(RESTHandler):
     def get(self):
-        self.write({})
+        """Retrieving orders that the current user is the vendor for.
+        """
+        self.log.info('[REST/GET] /sales')
+
+        count = self.get_argument('count')
+        offset = self.get_argument('offset')
+        sales_filter = self.get_argument('filter')
+
+        # market.sales(count, offset, sales_filter)
 
 
 class RESTSalesProtest(RESTHandler):
-    def get(self):
-        self.write({})
+    def post(self):
+        """Allows vendor to protest the order to a moderator in the
+        event of a problem.
+        """
+        self.log.info('[REST/POST] /sales/protest')
+
+        order_id = self.get_argument('order_id')
+        message_to_mod = self.get_argument('message_to_mod')
+
+        assert(len(order_id) > 0, 'No Order ID is specified')
+        assert(len(message_to_mod) > 0, 'No message content')
+
+        # sales.protest(order_id, message_to_mod)
 
 
 class RESTSalesRefund(RESTHandler):
-    def get(self):
-        self.write({})
+    def post(self):
+        """Allows vendor to refund the buyer and cancel the order.
+        """
+        self.log.info('[REST/POST] /sales/refund')
+
+        order_id = self.get_argument('order_id')
+
+        assert(len(order_id) > 0, 'No Order ID is specified')
+
+        # sales.refund(order_id)
 
 
 class RESTListings(RESTHandler):
