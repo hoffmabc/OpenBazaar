@@ -15,7 +15,7 @@ cmdline_args = "".join(sys.argv[1:])
 
 if re.match('.*/bin/openbazaar.py$', sys.argv[0]):
     # Change to base dir and run openbazaar
-    basedir = sys.argv[0].rstrip('/bin/openbazaar.py') + "/share/openbazaar.py"
+    basedir = sys.argv[0].replace('/bin/openbazaar.py', '/share/openbazaar.py')
     os.system("(cd \"%s\" && python -m node.openbazaar \"%s\") &)" % (basedir, cmdline_args))
 else:
     python_path = './env/bin/python'
